@@ -1,0 +1,7 @@
+{
+    "DB_USER" : "postgres",
+    "DB_PASS" : "habil123",
+    "DB_NAME" : "shoea",
+    "DB_HOST" : "localhost",
+    "DB_PORT" : "9000"
+}
