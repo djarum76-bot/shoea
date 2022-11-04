@@ -94,7 +94,7 @@ class MyApp extends StatelessWidget{
             create: (context) => NavbarCubit(),
           ),
           BlocProvider(
-            create: (context) => UserBloc(userRepository: RepositoryProvider.of<UserRepository>(context))..add(UserFetched()),
+            create: (context) => UserBloc(userRepository: RepositoryProvider.of<UserRepository>(context)),
           ),
           BlocProvider(
             create: (context) => CardBloc(cardRepository: RepositoryProvider.of<CardRepository>(context)),

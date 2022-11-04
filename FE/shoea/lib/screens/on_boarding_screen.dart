@@ -73,7 +73,7 @@ class OnBoardingScreen extends StatelessWidget{
               style: GoogleFonts.urbanist(color: AppTheme.backgroundColor, fontWeight: FontWeight.w600, fontSize: 22.sp),
             ),
             Text(
-              "Spatu",
+              "Shoea",
               style: GoogleFonts.urbanist(color: AppTheme.backgroundColor, fontWeight: FontWeight.w700, fontSize: 32.sp),
             ),
             Text(

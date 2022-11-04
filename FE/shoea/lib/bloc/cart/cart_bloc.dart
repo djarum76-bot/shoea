@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:formz/formz.dart';
 import 'package:shoea/models/cart_model.dart';
 import 'package:shoea/repositories/cart_repository.dart';
 
@@ -29,51 +28,53 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   }
 
   Future<void> _onCartFetched(CartFetched event, Emitter<CartState> emit)async{
+    emit(state.copyWith(status: CartStatus.fetchLoading));
     try{
       final carts = await cartRepository.getAllCarts();
       emit(state.copyWith(
-        carts: carts
+        carts: carts,
+        status: CartStatus.fetchSuccess
       ));
     }catch(e){
       emit(state.copyWith(
         message: e.toString(),
-        status: FormzStatus.submissionFailure
+        status: CartStatus.fetchError
       ));
       throw Exception(e);
     }
   }
 
   Future<void> _onCartAdded(CartAdded event, Emitter<CartState> emit)async{
-    emit(state.copyWith(status: FormzStatus.submissionInProgress));
+    emit(state.copyWith(status: CartStatus.addLoading));
     try{
       await cartRepository.addToCart(event.shoeID, event.color, event.size, event.qty);
       final carts = await cartRepository.getAllCarts();
       emit(state.copyWith(
         carts: carts,
-        status: FormzStatus.submissionSuccess
+        status: CartStatus.addSuccess
       ));
     }catch(e){
       emit(state.copyWith(
         message: e.toString(),
-        status: FormzStatus.submissionFailure
+        status: CartStatus.addError
       ));
       throw Exception(e);
     }
   }
 
   Future<void> _onCartDeleted(CartDeleted event, Emitter<CartState> emit)async{
-    emit(state.copyWith(status: FormzStatus.submissionInProgress));
+    emit(state.copyWith(status: CartStatus.deleteLoading));
     try{
       await cartRepository.deleteCart(event.cartID);
       final carts = await cartRepository.getAllCarts();
       emit(state.copyWith(
           carts: carts,
-          status: FormzStatus.submissionSuccess
+          status: CartStatus.deleteSuccess
       ));
     }catch(e){
       emit(state.copyWith(
           message: e.toString(),
-          status: FormzStatus.submissionFailure
+          status: CartStatus.deleteError
       ));
       throw Exception(e);
     }
@@ -84,12 +85,13 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       await cartRepository.updateQtyCart(event.cartID, event.qty + 1);
       final carts = await cartRepository.getAllCarts();
       emit(state.copyWith(
-        carts: carts
+        carts: carts,
+        status: CartStatus.fetchSuccess
       ));
     }catch(e){
       emit(state.copyWith(
         message: e.toString(),
-        status: FormzStatus.submissionFailure
+        status: CartStatus.error
       ));
       throw Exception(e);
     }
@@ -101,13 +103,14 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         await cartRepository.updateQtyCart(event.cartID, event.qty - 1);
         final carts = await cartRepository.getAllCarts();
         emit(state.copyWith(
-            carts: carts
+          carts: carts,
+          status: CartStatus.fetchSuccess
         ));
       }
     }catch(e){
       emit(state.copyWith(
           message: e.toString(),
-          status: FormzStatus.submissionFailure
+          status: CartStatus.error
       ));
       throw Exception(e);
     }

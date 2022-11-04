@@ -10,6 +10,7 @@ import 'package:shoea/bloc/auth/auth_bloc.dart';
 import 'package:shoea/bloc/user/user_bloc.dart';
 import 'package:shoea/components/app_button.dart';
 import 'package:shoea/components/widget/head_icon_text.dart';
+import 'package:shoea/cubit/navbar_cubit.dart';
 import 'package:shoea/utils/app_theme.dart';
 import 'package:shoea/utils/constants.dart';
 import 'package:shoea/utils/modal_dialog.dart';
@@ -22,8 +23,11 @@ class ProfileScreen extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _profileView(context),
+    return BlocProvider.value(
+      value: BlocProvider.of<UserBloc>(context)..add(UserFetched()),
+      child: Scaffold(
+        body: _profileView(context),
+      ),
     );
   }
 
@@ -38,6 +42,7 @@ class ProfileScreen extends StatelessWidget{
         if(state.status == AuthStatus.unauthenticated){
           EasyLoading.dismiss();
           Navigator.pushNamedAndRemoveUntil(context, Routes.loginScreen, (route) => false);
+          context.read<NavbarCubit>().changeTab(0);
         }
         if(state.status == AuthStatus.loading){
           EasyLoading.show(status: "Thank You:(");

@@ -52,44 +52,68 @@ class AddressScreen extends StatelessWidget{
   Widget _isHaveAddress(BuildContext context){
     return BlocBuilder<AddressBloc, AddressState>(
       builder: (context, state){
-        switch(state.status){
-          case AddressStatus.fetchLoading:
+        if(state.address == null){
+          if(state.status == AddressStatus.fetchLoading){
             return const Expanded(
               child: Center(
                 child: CircularProgressIndicator(),
               ),
             );
-          case AddressStatus.updateLoading:
-            return const Expanded(
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          case AddressStatus.fetchSuccess:
-            switch(state.addresses){
-              case <AddressModel>[]:
-                return Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "No Address Found",
-                        style: GoogleFonts.urbanist(fontSize: 18.sp),
-                      ),
-                      Text(
-                        "Add Your Address Below",
-                        style: GoogleFonts.urbanist(fontWeight: FontWeight.w700, fontSize: 18.sp),
-                      )
-                    ],
+          }else{
+            return Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "No Address Found",
+                    style: GoogleFonts.urbanist(fontSize: 18.sp),
                   ),
-                );
-              default:
-                return _addressList(context, state);
+                  Text(
+                    "Add Your Address Below",
+                    style: GoogleFonts.urbanist(fontWeight: FontWeight.w700, fontSize: 18.sp),
+                  )
+                ],
+              ),
+            );
+          }
+        }else{
+          if(state.status == AddressStatus.fetchLoading){
+            return const Expanded(
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }else if(state.status == AddressStatus.updateLoading){
+            return const Expanded(
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }else if(state.status == AddressStatus.fetchSuccess){
+            if(state.addresses.isEmpty){
+              return Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "No Address Found",
+                      style: GoogleFonts.urbanist(fontSize: 18.sp),
+                    ),
+                    Text(
+                      "Add Your Address Below",
+                      style: GoogleFonts.urbanist(fontWeight: FontWeight.w700, fontSize: 18.sp),
+                    )
+                  ],
+                ),
+              );
+            }else{
+              return _addressList(context, state);
             }
-          case AddressStatus.updateDefaultSuccess:
+          }else if(state.status == AddressStatus.updateDefaultSuccess || state.status == AddressStatus.addSuccess || state.status == AddressStatus.updateMapSuccess){
             return _addressList(context, state);
-          default:
+          }else{
             return SizedBox(
               width: double.infinity,
               height: 80.h,
@@ -104,6 +128,7 @@ class AddressScreen extends StatelessWidget{
                 ],
               ),
             );
+          }
         }
       },
     );

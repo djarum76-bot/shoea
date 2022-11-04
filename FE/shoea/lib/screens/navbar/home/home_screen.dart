@@ -41,8 +41,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: BlocProvider.of<ShoeBloc>(context)..add(ShoeFetched(Constants.brand)),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(
+          value: BlocProvider.of<ShoeBloc>(context)..add(ShoeFetched(Constants.brand)),
+        ),
+        BlocProvider.value(
+          value: BlocProvider.of<UserBloc>(context)..add(UserFetched()),
+        )
+      ],
       child: Scaffold(
         body: GestureDetector(
           onTap: (){

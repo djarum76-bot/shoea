@@ -151,12 +151,10 @@ class _OrderScreenState extends State<OrderScreen> {
     return BlocBuilder<OrderBloc, OrderState>(
       builder: (context, state){
         if(state.ordersActive.isEmpty){
-          return Expanded(
-            child: Center(
-              child: Text(
-                "No Active Order Found",
-                style: GoogleFonts.urbanist(fontSize: 18.sp),
-              ),
+          return Center(
+            child: Text(
+              "No Active Order Found",
+              style: GoogleFonts.urbanist(fontSize: 18.sp),
             ),
           );
         }else{
@@ -176,12 +174,10 @@ class _OrderScreenState extends State<OrderScreen> {
     return BlocBuilder<OrderBloc, OrderState>(
       builder: (context, state){
         if(state.ordersCompleted.isEmpty){
-          return Expanded(
-            child: Center(
-              child: Text(
-                "No Complete Order Found",
-                style: GoogleFonts.urbanist(fontSize: 18.sp),
-              ),
+          return Center(
+            child: Text(
+              "No Complete Order Found",
+              style: GoogleFonts.urbanist(fontSize: 18.sp),
             ),
           );
         }else{

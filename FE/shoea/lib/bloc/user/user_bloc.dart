@@ -56,7 +56,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     try{
       await userRepository.fillUserData(event.imagePath, event.name, event.date, event.phone, event.gender);
       emit(state.copyWith(
-        image: () => null,
         status: FormzStatus.submissionSuccess
       ));
     }catch(e){
@@ -75,6 +74,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       final user = await userRepository.getUser();
       emit(state.copyWith(
         user: user,
+        image: () => null,
         status: FormzStatus.submissionSuccess
       ));
     }catch(e){

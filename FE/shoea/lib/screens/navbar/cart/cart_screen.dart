@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:formz/formz.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:line_icons/line_icons.dart';
@@ -32,7 +31,7 @@ class CartScreen extends StatelessWidget{
           listeners: [
             BlocListener<CartBloc, CartState>(
               listener: (context, state){
-                if(state.status.isSubmissionFailure){
+                if(state.status == CartStatus.deleteError){
                   EasyLoading.dismiss();
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
@@ -40,11 +39,11 @@ class CartScreen extends StatelessWidget{
                         const SnackBar(content: Text("Error"))
                     );
                 }
-                if(state.status.isSubmissionSuccess){
+                if(state.status == CartStatus.deleteSuccess){
                   EasyLoading.dismiss();
                   Navigator.pop(context);
                 }
-                if(state.status.isSubmissionInProgress){
+                if(state.status == CartStatus.deleteLoading){
                   EasyLoading.show(status: "Deleting...",);
                 }
               },
@@ -67,7 +66,60 @@ class CartScreen extends StatelessWidget{
     final size = MediaQuery.of(context).size;
     return BlocBuilder<CartBloc, CartState>(
       builder: (context, state){
-        if(state.carts.isEmpty){
+        if(state.status == CartStatus.fetchLoading){
+          return SafeArea(
+            child: SizedBox(
+              width: size.width,
+              height: size.height,
+              child: Column(
+                children: [
+                  _cartHeader(context),
+                  const Expanded(
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        }else if((state.status == CartStatus.fetchSuccess) || (state.status == CartStatus.deleteSuccess)){
+          if(state.carts.isEmpty){
+            return SafeArea(
+              child: SizedBox(
+                width: size.width,
+                height: size.height,
+                child: Column(
+                  children: [
+                    _cartHeader(context),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          "Please Make a Purchase",
+                          style: GoogleFonts.urbanist(fontSize: 18.sp, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          }else{
+            return SafeArea(
+              child: SizedBox(
+                width: size.width,
+                height: size.height,
+                child: Column(
+                  children: [
+                    _cartHeader(context),
+                    _listCartItem(context, state),
+                    _priceAndCheckoutButton(context, state.carts)
+                  ],
+                ),
+              ),
+            );
+          }
+        }else{
           return SafeArea(
             child: SizedBox(
               width: size.width,
@@ -78,25 +130,11 @@ class CartScreen extends StatelessWidget{
                   Expanded(
                     child: Center(
                       child: Text(
-                        "Please Make a Purchase",
+                        state.message ?? "Error",
                         style: GoogleFonts.urbanist(fontSize: 18.sp, fontWeight: FontWeight.w600),
                       ),
                     ),
                   )
-                ],
-              ),
-            ),
-          );
-        }else{
-          return SafeArea(
-            child: SizedBox(
-              width: size.width,
-              height: size.height,
-              child: Column(
-                children: [
-                  _cartHeader(context),
-                  _listCartItem(context, state),
-                  _priceAndCheckoutButton(context, state.carts)
                 ],
               ),
             ),

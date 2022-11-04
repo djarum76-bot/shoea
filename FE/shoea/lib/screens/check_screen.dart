@@ -9,9 +9,12 @@ class CheckScreen extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: _checkView(context),
+    return BlocProvider.value(
+      value: BlocProvider.of<UserBloc>(context)..add(UserFetched()),
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: _checkView(context),
+      ),
     );
   }
 

@@ -52,11 +52,13 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
     try{
       await addressRepository.addAddress(event.provinceID, event.cityID, event.lat, event.lng, event.addressName, event.addressDetail);
       final addresses = await addressRepository.getAllAddress();
+      final address = await addressRepository.getDefaultAddress();
       emit(state.copyWith(
         status: AddressStatus.addSuccess,
         selectedProvince: () => null,
         selectedCity: () => null,
-        addresses: addresses
+        addresses: addresses,
+        address: address
       ));
     }catch(e){
       emit(state.copyWith(

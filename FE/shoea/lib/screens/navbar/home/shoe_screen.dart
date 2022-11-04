@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:formz/formz.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
@@ -25,30 +24,32 @@ class ShoeScreen extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CartBloc, CartState>(
-      listener: (context, state){
-        if(state.status.isSubmissionFailure){
-          EasyLoading.dismiss();
-          ModalDialog.dangerDialog(context);
-        }
-        if(state.status.isSubmissionSuccess){
-          EasyLoading.dismiss();
-          BlocProvider.of<ShoeBloc>(context).add(ShoeDetailNavigation());
-          context.read<NavbarCubit>().changeTab(1);
-          Navigator.pushNamedAndRemoveUntil(context, Routes.navbarScreen, (route) => false);
-        }
-        if(state.status.isSubmissionInProgress){
-          EasyLoading.show(status: "Adding...",);
-        }
-      },
-      child: WillPopScope(
-        child: Scaffold(
-          body: _shoeView(context),
-        ),
-        onWillPop: (){
-          BlocProvider.of<ShoeBloc>(context).add(ShoeDetailNavigation());
-          return Future.value(true);
+    return BlocProvider.value(
+      value: BlocProvider.of<ShoeBloc>(context)..add(ShoeDetailNavigation()),
+      child: BlocListener<CartBloc, CartState>(
+        listener: (context, state){
+          if(state.status == CartStatus.error){
+            EasyLoading.dismiss();
+            ModalDialog.dangerDialog(context);
+          }
+          if(state.status == CartStatus.addSuccess){
+            EasyLoading.dismiss();
+            context.read<NavbarCubit>().changeTab(1);
+            Navigator.pushNamedAndRemoveUntil(context, Routes.navbarScreen, (route) => false);
+          }
+          if(state.status == CartStatus.addLoading){
+            EasyLoading.show(status: "Adding...",);
+          }
         },
+        child: WillPopScope(
+          child: Scaffold(
+            body: _shoeView(context),
+          ),
+          onWillPop: (){
+            BlocProvider.of<ShoeBloc>(context).add(ShoeDetailNavigation());
+            return Future.value(true);
+          },
+        ),
       ),
     );
   }

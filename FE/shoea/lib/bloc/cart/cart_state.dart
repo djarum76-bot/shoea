@@ -1,14 +1,16 @@
 part of 'cart_bloc.dart';
 
+enum CartStatus { initial, addLoading, fetchLoading, deleteLoading, addSuccess, fetchSuccess, deleteSuccess, addError, fetchError, deleteError, error }
+
 class CartState extends Equatable{
   const CartState({
     this.carts = const <CartModel>[],
-    this.status = FormzStatus.pure,
+    this.status = CartStatus.initial,
     this.message
   });
 
   final List<CartModel> carts;
-  final FormzStatus status;
+  final CartStatus status;
   final String? message;
 
   @override
@@ -16,7 +18,7 @@ class CartState extends Equatable{
 
   CartState copyWith({
     List<CartModel>? carts,
-    FormzStatus? status,
+    CartStatus? status,
     String? message
   }) {
     return CartState(

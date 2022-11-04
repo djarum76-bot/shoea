@@ -55,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget _splashText(){
     return Center(
       child: Text(
-        "Spatu",
+        "Shoea",
         style: GoogleFonts.urbanist(color: AppTheme.primaryColor, fontSize: 32.sp, fontWeight: FontWeight.w600),
       ),
     );
