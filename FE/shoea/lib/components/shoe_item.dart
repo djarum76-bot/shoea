@@ -1,29 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
-import 'package:shoea/bloc/shoe/shoe_bloc.dart';
+import 'package:shoea/models/brand_model.dart';
+import 'package:shoea/models/help_model.dart';
 import 'package:shoea/models/shoe_model.dart';
 import 'package:shoea/utils/app_theme.dart';
 import 'package:shoea/utils/constants.dart';
 import 'package:shoea/utils/currency_format.dart';
 import 'package:shoea/utils/routes.dart';
+import 'package:shoea/utils/screen_argument.dart';
 
 class ShoeItem extends StatelessWidget{
-  const ShoeItem({super.key, required this.shoe, required this.shoes, this.isGrid = false});
+  const ShoeItem({super.key, required this.shoe, required this.shoes, this.isGrid = false, required this.brand, required this.isFavorite});
 
   final ShoeModel shoe;
   final bool isGrid;
   final List<ShoeModel> shoes;
+  final BrandModel brand;
+  final bool isFavorite;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: (){
-        BlocProvider.of<ShoeBloc>(context).add(ShoeDetailFetched(shoe.id!));
-        Navigator.pushNamed(context, Routes.shoeScreen);
+        Navigator.pushNamed(
+          context,
+          Routes.shoeScreen,
+          arguments: ScreenArgument<HelpModel>(
+            HelpModel(shoeID: shoe.id!, brand: brand, isFavorite: isFavorite)
+          )
+        );
       },
       child: Container(
         width: 45.1.w,

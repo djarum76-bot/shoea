@@ -53,6 +53,29 @@ class ShoeRepository{
     }
   }
 
+  Future<List<ShoeModel>> getAllShoesSearch(String title)async{
+    try{
+      final response = await InternetService.dio.get('/auth/get-all-shoes-search/$title',
+        options: Options(
+          headers: {
+            Constants.accept : Constants.appJson,
+            HttpHeaders.authorizationHeader : "${Constants.bearer} ${StorageService.box.read(Constants.token)}"
+          }
+        )
+      );
+
+      if(response.statusCode == 200){
+        final datas = response.data as List;
+        final list = datas.map((data) => ShoeModel.fromJson(data)).toList();
+        return list;
+      }else{
+        throw Exception();
+      }
+    }catch(e){
+      throw Exception(e);
+    }
+  }
+
   Future<ShoeModel> getShoe(int id)async{
     try{
       final response = await InternetService.dio.get("/auth/get-shoe/$id",

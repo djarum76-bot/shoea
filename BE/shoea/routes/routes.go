@@ -45,7 +45,14 @@ func Init() *echo.Echo {
 
 	r.GET("/get-all-popular-shoes", controllers.GetAllPopularShoes)
 	r.GET("/get-all-brand-shoes/:brand", controllers.GetAllBrandShoes)
+	r.GET("/get-all-shoes-search/:title", controllers.GetAllShoesSearch)
 	r.GET("/get-shoe/:id", controllers.GetShoe)
+
+	r.POST("/add-to-favorite/:shoe_id", controllers.AddToFavorite)
+	r.DELETE("/delete-from-favorite/:favorite_id", controllers.DeleteFromFavorite)
+	r.GET("/get-favorite/:shoe_id", controllers.GetFavorite)
+	r.GET("/get-all-favorite-shoes", controllers.GetAllFavoriteShoes)
+	r.GET("/get-all-favorite-shoes-by-brand/:brand", controllers.GetAllFavoriteShoesByBrand)
 
 	r.POST("/add-to-cart/:shoe_id", controllers.AddToCart)
 	r.GET("/get-all-carts", controllers.GetAllCarts)

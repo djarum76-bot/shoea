@@ -8,7 +8,6 @@ import 'package:shoea/bloc/shoe/shoe_bloc.dart';
 import 'package:shoea/bloc/user/user_bloc.dart';
 import 'package:shoea/components/shoe_item.dart';
 import 'package:shoea/models/brand_model.dart';
-import 'package:shoea/models/shoe_model.dart';
 import 'package:shoea/utils/app_theme.dart';
 import 'package:shoea/utils/constants.dart';
 import 'package:shoea/utils/list_item.dart';
@@ -44,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(
-          value: BlocProvider.of<ShoeBloc>(context)..add(ShoeFetched(Constants.brand)),
+          value: BlocProvider.of<ShoeBloc>(context)..add(ShoeFetched(Constants.brand, false)),
         ),
         BlocProvider.value(
           value: BlocProvider.of<UserBloc>(context)..add(UserFetched()),
@@ -67,25 +66,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _homeView(BuildContext context){
     final size = MediaQuery.of(context).size;
-    return SafeArea(
-      child: Container(
-        width: size.width,
-        height: size.height,
-        padding: EdgeInsets.fromLTRB(1.5.h, 1.5.h, 1.5.h, 0),
-        child: ListView(
-          children: [
-            _headerHome(context),
-            _searchForm(),
-            _specialOffer(),
-            _carouselPromotion(context),
-            _brandButton(),
-            _mostPopular(context),
-            Container(height: 2.5.h, color: AppTheme.backgroundColor,),
-            StickyHeader(
-              header: _brandFilter(context),
-              content: _shoesCollection(context),
-            ),
-          ],
+    return BlocListener<ShoeBloc, ShoeState>(
+      listener: (context, state){
+        if(state.status == ShoeStatus.searchNavigation){
+          Navigator.pushNamed(context, Routes.searchScreen);
+        }
+      },
+      child: SafeArea(
+        child: Container(
+          width: size.width,
+          height: size.height,
+          padding: EdgeInsets.fromLTRB(1.5.h, 1.5.h, 1.5.h, 0),
+          child: ListView(
+            children: [
+              _headerHome(context),
+              _searchForm(),
+              _specialOffer(),
+              _carouselPromotion(context),
+              _brandButton(),
+              _mostPopular(context),
+              Container(height: 2.5.h, color: AppTheme.backgroundColor,),
+              StickyHeader(
+                header: _brandFilter(context),
+                content: _shoesCollection(context),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -248,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
         decoration: AppTheme.inputPrefixDecoration(LineIcons.search, "Search", 12),
         readOnly: true,
         onTap: (){
-          Navigator.pushNamed(context, Routes.searchScreen);
+          BlocProvider.of<ShoeBloc>(context).add(ShoeSearchNavigation());
         },
       ),
     );
@@ -430,7 +436,7 @@ class _HomeScreenState extends State<HomeScreen> {
             side: const BorderSide(color: AppTheme.primaryColor),
             onSelected: (selected){
               BlocProvider.of<ShoeBloc>(context).add(
-                ShoeFetched(brand)
+                ShoeFetched(brand, false)
               );
             },
           ),
@@ -457,21 +463,23 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }else{
           return Wrap(
-            children: _shoesList(context, state.shoes),
+            children: _shoesList(context, state),
           );
         }
       },
     );
   }
 
-  List<Widget> _shoesList(BuildContext context, List<ShoeModel> shoes){
+  List<Widget> _shoesList(BuildContext context, ShoeState state){
     List<Widget> widget = [];
 
-    for(var shoe in shoes){
+    for(var shoe in state.shoes){
       widget.add(
         ShoeItem(
           shoe: shoe,
-          shoes: shoes,
+          shoes: state.shoes,
+          brand: state.selectedBrand,
+          isFavorite: false,
         )
       );
     }

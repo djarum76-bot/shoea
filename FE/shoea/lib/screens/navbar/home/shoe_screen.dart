@@ -11,6 +11,7 @@ import 'package:shoea/bloc/cart/cart_bloc.dart';
 import 'package:shoea/bloc/shoe/shoe_bloc.dart';
 import 'package:shoea/components/app_button.dart';
 import 'package:shoea/cubit/navbar_cubit.dart';
+import 'package:shoea/models/help_model.dart';
 import 'package:shoea/models/shoe_model.dart';
 import 'package:shoea/utils/app_theme.dart';
 import 'package:shoea/utils/constants.dart';
@@ -20,37 +21,46 @@ import 'package:shoea/utils/routes.dart';
 import 'package:shoea/utils/screen_argument.dart';
 
 class ShoeScreen extends StatelessWidget{
-  const ShoeScreen({super.key});
+  const ShoeScreen({super.key, required this.helper});
+  final HelpModel helper;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: BlocProvider.of<ShoeBloc>(context)..add(ShoeDetailNavigation()),
-      child: BlocListener<CartBloc, CartState>(
-        listener: (context, state){
-          if(state.status == CartStatus.error){
-            EasyLoading.dismiss();
-            ModalDialog.dangerDialog(context);
-          }
-          if(state.status == CartStatus.addSuccess){
-            EasyLoading.dismiss();
-            context.read<NavbarCubit>().changeTab(1);
-            Navigator.pushNamedAndRemoveUntil(context, Routes.navbarScreen, (route) => false);
-          }
-          if(state.status == CartStatus.addLoading){
-            EasyLoading.show(status: "Adding...",);
-          }
-        },
+      value: BlocProvider.of<ShoeBloc>(context)..add(ShoeDetailFetched(helper.shoeID)),
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<CartBloc, CartState>(
+            listener: (context, state){
+              if(state.status == CartStatus.error){
+                EasyLoading.dismiss();
+                ModalDialog.dangerDialog(context);
+              }
+              if(state.status == CartStatus.addSuccess){
+                EasyLoading.dismiss();
+                context.read<NavbarCubit>().changeTab(1);
+                Navigator.pushNamedAndRemoveUntil(context, Routes.navbarScreen, (route) => false);
+              }
+              if(state.status == CartStatus.addLoading){
+                EasyLoading.show(status: "Adding...",);
+              }
+            },
+          ),
+          BlocListener<ShoeBloc, ShoeState>(
+            listener: (context, state){
+              EasyLoading.dismiss();
+            },
+          )
+        ],
         child: WillPopScope(
           child: Scaffold(
             body: _shoeView(context),
           ),
           onWillPop: (){
-            BlocProvider.of<ShoeBloc>(context).add(ShoeDetailNavigation());
             return Future.value(true);
           },
         ),
-      ),
+      )
     );
   }
 
@@ -58,22 +68,39 @@ class ShoeScreen extends StatelessWidget{
     final size = MediaQuery.of(context).size;
     return BlocBuilder<ShoeBloc, ShoeState>(
       builder: (context, state){
-        if(state.shoe == null){
+        if(state.status == ShoeStatus.loading){
           return const SafeArea(
             child: Center(
               child: CircularProgressIndicator(color: AppTheme.primaryColor,),
             ),
           );
+        }else if(state.status == ShoeStatus.fetchDetailShoeSuccess){
+          if(state.shoe == null){
+            return const SafeArea(
+              child: Center(
+                child: CircularProgressIndicator(color: AppTheme.primaryColor,),
+              ),
+            );
+          }else{
+            return SafeArea(
+              child: SizedBox(
+                width: size.width,
+                height: size.height,
+                child: ListView(
+                  children: [
+                    _shoeImageAndBack(context, state),
+                    _shoeBody(context, state)
+                  ],
+                ),
+              ),
+            );
+          }
         }else{
           return SafeArea(
-            child: SizedBox(
-              width: size.width,
-              height: size.height,
-              child: ListView(
-                children: [
-                  _shoeImageAndBack(context, state),
-                  _shoeBody(context, state)
-                ],
+            child: Center(
+              child: Text(
+                state.message ?? "Error",
+                style: GoogleFonts.urbanist(fontSize: 18.sp),
               ),
             ),
           );
@@ -100,7 +127,6 @@ class ShoeScreen extends StatelessWidget{
         children: [
           GestureDetector(
             onTap: (){
-              BlocProvider.of<ShoeBloc>(context).add(ShoeDetailNavigation());
               Navigator.pop(context);
             },
             child: const CircleAvatar(
@@ -165,14 +191,32 @@ class ShoeScreen extends StatelessWidget{
       width: 3.h,
       height: 3.h,
       child: InkWell(
-        onTap: (){},
+        onTap: (){
+          if(state.favorite!.id! == 0){
+            BlocProvider.of<ShoeBloc>(context).add(ShoeFavoriteAdded(helper));
+          }else{
+            BlocProvider.of<ShoeBloc>(context).add(ShoeFavoriteDeleted(state.favorite!.id!, helper));
+          }
+        },
         borderRadius: BorderRadius.circular(200),
-        child: Icon(
-          LineIcons.heart,
-          size: 3.h,
-        ),
+        child: _isFavorite(state.favorite!.id!)
       ),
     );
+  }
+
+  Widget _isFavorite(int id){
+    if(id == 0){
+      return Icon(
+        Icons.favorite_border,
+        size: 3.h,
+      );
+    }else{
+      return Icon(
+        Icons.favorite,
+        color: Colors.red,
+        size: 3.h,
+      );
+    }
   }
 
   Widget _shoeSoldRatingReview(BuildContext context, ShoeState state){

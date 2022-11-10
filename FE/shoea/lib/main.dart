@@ -20,6 +20,8 @@ import 'package:shoea/repositories/auth_repository.dart';
 import 'package:shoea/repositories/card_repository.dart';
 import 'package:shoea/repositories/cart_repository.dart';
 import 'package:shoea/repositories/checkout_repository.dart';
+import 'package:shoea/repositories/favorite_repository.dart';
+import 'package:shoea/repositories/history_repository.dart';
 import 'package:shoea/repositories/order_repository.dart';
 import 'package:shoea/repositories/review_repository.dart';
 import 'package:shoea/repositories/shoe_repository.dart';
@@ -80,6 +82,12 @@ class MyApp extends StatelessWidget{
         ),
         RepositoryProvider(
           create: (context) => TransactionRepository(),
+        ),
+        RepositoryProvider(
+          create: (context) => HistoryRepository(),
+        ),
+        RepositoryProvider(
+          create: (context) => FavoriteRepository(),
         )
       ],
       child: MultiBlocProvider(
@@ -105,7 +113,9 @@ class MyApp extends StatelessWidget{
           BlocProvider(
             create: (context) => ShoeBloc(
               shoeRepository: RepositoryProvider.of<ShoeRepository>(context),
-              reviewRepository: RepositoryProvider.of<ReviewRepository>(context)
+              reviewRepository: RepositoryProvider.of<ReviewRepository>(context),
+              historyRepository: RepositoryProvider.of<HistoryRepository>(context),
+              favoriteRepository: RepositoryProvider.of<FavoriteRepository>(context)
             ),
           ),
           BlocProvider(

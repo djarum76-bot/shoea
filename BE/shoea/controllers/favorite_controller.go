@@ -8,47 +8,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func AddShoe(c echo.Context) error {
-	brand := c.FormValue("brand")
-	image, err := c.FormFile("image")
+func AddToFavorite(c echo.Context) error {
+	claim := getTokenInfo(c)
+	userID := claim.ID
+	shoeID, err := strconv.Atoi(c.Param("shoe_id"))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"message": err.Error(),
 		})
 	}
 
-	title := c.FormValue("title")
-	description := c.FormValue("description")
-
-	form, err := c.MultipartForm()
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
-	}
-
-	arrSize := form.Value["size"]
-	size := []int{}
-	for _, i := range arrSize {
-		j, err := strconv.Atoi(i)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{
-				"message": err.Error(),
-			})
-		}
-		size = append(size, j)
-	}
-
-	color := form.Value["color"]
-
-	price, err := strconv.Atoi(c.FormValue("price"))
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
-	}
-
-	res, err := models.AddShoe(brand, image, title, description, size, color, price)
+	res, err := models.AddToFavorite(userID, shoeID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"message": err.Error(),
@@ -58,8 +28,15 @@ func AddShoe(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func GetAllPopularShoes(c echo.Context) error {
-	res, err := models.GetAllPopularShoes()
+func DeleteFromFavorite(c echo.Context) error {
+	favoriteID, err := strconv.Atoi(c.Param("favorite_id"))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": err.Error(),
+		})
+	}
+
+	res, err := models.DeleteFromFavorite(favoriteID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"message": err.Error(),
@@ -69,33 +46,46 @@ func GetAllPopularShoes(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func GetAllBrandShoes(c echo.Context) error {
+func GetFavorite(c echo.Context) error {
+	claim := getTokenInfo(c)
+	userID := claim.ID
+	shoeID, err := strconv.Atoi(c.Param("shoe_id"))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": err.Error(),
+		})
+	}
+
+	res, err := models.GetFavorite(shoeID, userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func GetAllFavoriteShoes(c echo.Context) error {
+	claim := getTokenInfo(c)
+	userID := claim.ID
+
+	res, err := models.GetAllFavoriteShoes(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+func GetAllFavoriteShoesByBrand(c echo.Context) error {
+	claim := getTokenInfo(c)
+	userID := claim.ID
 	brand := c.Param("brand")
-	res, err := models.GetAllBrandShoes(brand)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
-	}
 
-	return c.JSON(http.StatusOK, res)
-}
-
-func GetAllShoesSearch(c echo.Context) error {
-	title := c.Param("title")
-	res, err := models.GetAllShoesSearch(title)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
-	}
-
-	return c.JSON(http.StatusOK, res)
-}
-
-func GetShoe(c echo.Context) error {
-	ID := c.Param("id")
-	res, err := models.GetShoe(ID)
+	res, err := models.GetAllFavoriteShoesByBrand(userID, brand)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"message": err.Error(),

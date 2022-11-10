@@ -78,5 +78,10 @@ class Constants{
   static const rating = "rating";
   static const comment = "comment";
 
+  static const dbName = "histories";
+  static const id = "id";
+  static const uuid = "uuid";
+  static const accessAt = "access_at";
+
   static const brand = BrandModel(icon: SimpleIcons.adidas, name: "All", id: 0);
 }

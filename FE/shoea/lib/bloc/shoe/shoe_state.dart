@@ -1,6 +1,6 @@
 part of 'shoe_bloc.dart';
 
-enum ShoeStatus { initial, loading, data, noData, addReviewSuccess, error }
+enum ShoeStatus { initial, loading, loadingOrder, fetchSearchSuccess, fetchHistorySuccess, fetchDetailShoeSuccess, fetchBrandSuccess, fetchAllShoeSuccess, fetchBrandFavoriteSuccess, fetchAllShoeFavoriteSuccess, searchNavigation, addReviewSuccess, error }
 
 class ShoeState extends Equatable{
   const ShoeState({
@@ -12,6 +12,8 @@ class ShoeState extends Equatable{
     this.color,
     this.qty = 1,
     this.search,
+    this.histories = const <HistoryModel>[],
+    this.favorite,
     this.message
   });
 
@@ -23,10 +25,12 @@ class ShoeState extends Equatable{
   final String? color;
   final int qty;
   final String? search;
+  final List<HistoryModel> histories;
+  final FavoriteModel? favorite;
   final String? message;
 
   @override
-  List<Object?> get props => [selectedBrand, shoes, shoe, status, size, color, qty, search];
+  List<Object?> get props => [selectedBrand, shoes, shoe, status, size, color, qty, search, histories, favorite];
 
   ShoeState copyWith({
     BrandModel? selectedBrand,
@@ -37,6 +41,8 @@ class ShoeState extends Equatable{
     ValueGetter<String?>? color,
     int? qty,
     String? search,
+    List<HistoryModel>? histories,
+    FavoriteModel? favorite,
     String? message,
   }) {
     return ShoeState(
@@ -48,6 +54,8 @@ class ShoeState extends Equatable{
       color: color != null ? color() : this.color,
       qty: qty ?? this.qty,
       search: search ?? this.search,
+      histories: histories ?? this.histories,
+      favorite: favorite ?? this.favorite,
       message: message ?? this.message
     );
   }

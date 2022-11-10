@@ -8,22 +8,29 @@ abstract class ShoeEvent extends Equatable{
 
 class ShoeFetched extends ShoeEvent{
   final BrandModel brand;
+  final bool isFavorite;
 
-  ShoeFetched(this.brand);
+  ShoeFetched(this.brand, this.isFavorite);
 }
 
-class ShoeNavigation extends ShoeEvent{
-  final BrandModel brand;
+class ShoeNavigation extends ShoeEvent{}
 
-  ShoeNavigation(this.brand);
+class ShoeSearchNavigation extends ShoeEvent{}
+
+class ShoeHistoryFetched extends ShoeEvent{}
+
+class ShoeHistoryDeleted extends ShoeEvent{
+  final String uuid;
+
+  ShoeHistoryDeleted(this.uuid);
 }
 
-class ShoeDetailNavigation extends ShoeEvent{}
+class ShoeHistoryDeletedAll extends ShoeEvent{}
 
-class ShoeSearch extends ShoeEvent{
+class ShoeSearchFetched extends ShoeEvent{
   final String query;
 
-  ShoeSearch(this.query);
+  ShoeSearchFetched(this.query);
 }
 
 class ShoeDetailFetched extends ShoeEvent{
@@ -55,4 +62,17 @@ class ShoeReviewAdded extends ShoeEvent{
   final String comment;
 
   ShoeReviewAdded(this.orderID, this.shoeID, this.rating, this.comment);
+}
+
+class ShoeFavoriteAdded extends ShoeEvent{
+  final HelpModel helper;
+
+  ShoeFavoriteAdded(this.helper);
+}
+
+class ShoeFavoriteDeleted extends ShoeEvent{
+  final int favoriteID;
+  final HelpModel helper;
+
+  ShoeFavoriteDeleted(this.favoriteID, this.helper);
 }

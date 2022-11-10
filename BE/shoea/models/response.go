@@ -127,3 +127,9 @@ type Review struct {
 	Comment   string  `json:"comment"`
 	CreatedAt string  `json:"created_at"`
 }
+
+type Favorite struct {
+	ID     int `json:"id"`
+	UserID int `json:"user_id"`
+	ShoeID int `json:"shoe_id"`
+}

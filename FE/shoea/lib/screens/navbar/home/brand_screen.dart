@@ -6,7 +6,6 @@ import 'package:shoea/bloc/shoe/shoe_bloc.dart';
 import 'package:shoea/components/shoe_item.dart';
 import 'package:shoea/components/widget/head_bloc_text.dart';
 import 'package:shoea/models/brand_model.dart';
-import 'package:shoea/utils/constants.dart';
 
 class BrandScreen extends StatelessWidget{
   const BrandScreen({super.key, required this.brand});
@@ -16,10 +15,10 @@ class BrandScreen extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: BlocProvider.of<ShoeBloc>(context)..add(ShoeFetched(brand)),
+      value: BlocProvider.of<ShoeBloc>(context)..add(ShoeFetched(brand, false)),
       child: WillPopScope(
         onWillPop: (){
-          BlocProvider.of<ShoeBloc>(context).add(ShoeNavigation(Constants.brand));
+          BlocProvider.of<ShoeBloc>(context).add(ShoeNavigation());
           return Future.value(true);
         },
         child: Scaffold(
@@ -42,7 +41,7 @@ class BrandScreen extends StatelessWidget{
                 context: context,
                 text: brand.name!,
                 onTap: (){
-                  BlocProvider.of<ShoeBloc>(context).add(ShoeNavigation(Constants.brand));
+                  BlocProvider.of<ShoeBloc>(context).add(ShoeNavigation());
                   Navigator.pop(context);
                 }
             ),
@@ -56,35 +55,52 @@ class BrandScreen extends StatelessWidget{
   Widget _shoesCollection(BuildContext context){
     return BlocBuilder<ShoeBloc, ShoeState>(
       builder: (context, state){
-        if(state.shoes.isEmpty){
+        if(state.status == ShoeStatus.loading){
+          return const Expanded(
+            child: CircularProgressIndicator(),
+          );
+        }else if(state.status == ShoeStatus.fetchBrandSuccess || state.status == ShoeStatus.fetchDetailShoeSuccess){
+          if(state.shoes.isEmpty){
+            return Expanded(
+              child: Center(
+                child: Text(
+                  "No Shoes Found",
+                  style: GoogleFonts.urbanist(fontSize: 18.sp, fontWeight: FontWeight.w700),
+                ),
+              ),
+            );
+          }else{
+            return Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(top: 1.5.h),
+                child: GridView.builder(
+                  itemCount: state.shoes.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.65,
+                      crossAxisSpacing: 1.2.h,
+                      mainAxisExtent: 36.h
+                  ),
+                  itemBuilder: (context, index){
+                    var shoe = state.shoes[index];
+                    return ShoeItem(
+                      shoe: shoe,
+                      shoes: state.shoes,
+                      isGrid: true,
+                      brand: state.selectedBrand,
+                      isFavorite: false,
+                    );
+                  },
+                ),
+              ),
+            );
+          }
+        }else{
           return Expanded(
             child: Center(
               child: Text(
-                "No Shoes Found",
-                style: GoogleFonts.urbanist(fontSize: 18.sp, fontWeight: FontWeight.w700),
-              ),
-            ),
-          );
-        }else{
-          return Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(top: 1.5.h),
-              child: GridView.builder(
-                itemCount: state.shoes.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.65,
-                    crossAxisSpacing: 1.2.h,
-                    mainAxisExtent: 36.h
-                ),
-                itemBuilder: (context, index){
-                  var shoe = state.shoes[index];
-                  return ShoeItem(
-                    shoe: shoe,
-                    shoes: state.shoes,
-                    isGrid: true,
-                  );
-                },
+                state.message ?? "Error",
+                style: GoogleFonts.urbanist(fontSize: 18.sp),
               ),
             ),
           );

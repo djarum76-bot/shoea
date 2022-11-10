@@ -67,7 +67,7 @@ class _OrderScreenState extends State<OrderScreen> {
           EasyLoading.dismiss();
           Navigator.pop(context);
         }
-        if(state.status == ShoeStatus.loading){
+        if(state.status == ShoeStatus.loadingOrder){
           EasyLoading.show(status: "Adding...",);
         }
       },

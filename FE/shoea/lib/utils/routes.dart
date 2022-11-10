@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shoea/bloc/user/user_bloc.dart';
 import 'package:shoea/models/address_model.dart';
 import 'package:shoea/models/brand_model.dart';
+import 'package:shoea/models/help_model.dart';
 import 'package:shoea/models/order_model.dart';
 import 'package:shoea/models/transaction_model.dart';
 import 'package:shoea/screens/check_screen.dart';
@@ -103,7 +104,8 @@ class Routes{
       case searchScreen:
         return MaterialPageRoute(builder: (_) => const SearchScreen());
       case shoeScreen:
-        return MaterialPageRoute(builder: (_) => const ShoeScreen());
+        final args = settings.arguments as ScreenArgument<HelpModel>;
+        return MaterialPageRoute(builder: (_) => ShoeScreen(helper: args.data));
       case commentScreen:
         final args = settings.arguments as ScreenArgument<List<dynamic>>;
         return MaterialPageRoute(builder: (_) => CommentScreen(shoeData: args.data,));

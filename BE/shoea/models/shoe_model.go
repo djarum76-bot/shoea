@@ -102,6 +102,33 @@ func GetAllBrandShoes(brand string) ([]Shoe, error) {
 	return arrShoe, nil
 }
 
+func GetAllShoesSearch(title string) ([]Shoe, error) {
+	var shoe Shoe
+	arrShoe := []Shoe{}
+	var err error
+
+	con := db.CreateCon()
+
+	sqlStatement := "SELECT * FROM shoes WHERE LOWER(shoes.title) LIKE " + "'%" + title + "%'"
+
+	rows, err := con.Query(sqlStatement)
+	if err != nil {
+		return arrShoe, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err = rows.Scan(&shoe.ID, &shoe.Brand, &shoe.Image, &shoe.Title, &shoe.Sold, &shoe.Rating, &shoe.Review, &shoe.Description, pq.Array(&shoe.Sizes), pq.Array(&shoe.Colors), &shoe.Price)
+		if err != nil {
+			return arrShoe, err
+		}
+
+		arrShoe = append(arrShoe, shoe)
+	}
+
+	return arrShoe, nil
+}
+
 func GetShoe(ID string) (Shoe, error) {
 	var shoe Shoe
 	var err error

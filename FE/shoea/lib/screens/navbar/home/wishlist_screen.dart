@@ -15,50 +15,80 @@ class WishlistScreen extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _wishlistView(context),
-    );
-  }
-
-  Widget _wishlistView(BuildContext context){
-    final size = MediaQuery.of(context).size;
-    return SafeArea(
-      child: Container(
-        width: size.width,
-        height: size.height,
-        padding: EdgeInsets.fromLTRB(1.5.h, 1.5.h, 1.5.h, 0),
-        child: Column(
-          children: [
-            headBlocText(
-                context: context,
-                text: "My Wishlist",
-                onTap: (){
-                  BlocProvider.of<ShoeBloc>(context).add(ShoeNavigation(Constants.brand));
-                  Navigator.pop(context);
-                }
-            ),
-            _brandFilter(context),
-            _shoesCollection(context)
-          ],
+    return BlocProvider.value(
+      value: BlocProvider.of<ShoeBloc>(context)..add(ShoeFetched(Constants.brand, true)),
+      child: WillPopScope(
+        onWillPop: (){
+          BlocProvider.of<ShoeBloc>(context).add(ShoeNavigation());
+          return Future.value(true);
+        },
+        child: Scaffold(
+          body: _wishlistView(context),
         ),
       ),
     );
   }
 
-  Widget _brandFilter(BuildContext context){
+  Widget _wishlistView(BuildContext context){
+    final size = MediaQuery.of(context).size;
+    return BlocBuilder<ShoeBloc, ShoeState>(
+      builder: (context, state){
+        return SafeArea(
+          child: Container(
+            width: size.width,
+            height: size.height,
+            padding: EdgeInsets.fromLTRB(1.5.h, 1.5.h, 1.5.h, 0),
+            child: Column(
+              children: [
+                headBlocText(
+                    context: context,
+                    text: "My Wishlist",
+                    onTap: (){
+                      BlocProvider.of<ShoeBloc>(context).add(ShoeNavigation());
+                      Navigator.pop(context);
+                    }
+                ),
+                _brandFilter(context, state),
+                _wishlistContent(context, state)
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _wishlistContent(BuildContext context, ShoeState state){
+    if(state.status == ShoeStatus.loading){
+      return const Expanded(
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }else if(state.status == ShoeStatus.fetchAllShoeFavoriteSuccess || state.status == ShoeStatus.fetchBrandFavoriteSuccess || state.status == ShoeStatus.fetchDetailShoeSuccess){
+      return _shoesCollection(context, state);
+    }else{
+      return Expanded(
+        child: Center(
+          child: Text(
+            state.message ?? "Error",
+            style: GoogleFonts.urbanist(fontSize: 18.sp),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _brandFilter(BuildContext context, ShoeState state){
     final size = MediaQuery.of(context).size;
     return Container(
       width: size.width,
       height: 4.5.h,
       color: AppTheme.backgroundColor,
       margin: EdgeInsets.symmetric(vertical: 1.5.h),
-      child: BlocBuilder<ShoeBloc, ShoeState>(
-        builder: (context, state){
-          return ListView(
-            scrollDirection: Axis.horizontal,
-            children: _brandChip(context, state.selectedBrand),
-          );
-        },
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: _brandChip(context, state.selectedBrand),
       ),
     );
   }
@@ -78,9 +108,9 @@ class WishlistScreen extends StatelessWidget{
               backgroundColor: AppTheme.backgroundColor,
               side: const BorderSide(color: AppTheme.primaryColor),
               onSelected: (selected){
-                // BlocProvider.of<ShoeBloc>(context).add(
-                //     ShoeFilter(brand)
-                // );
+                BlocProvider.of<ShoeBloc>(context).add(
+                    ShoeFetched(brand, true)
+                );
               },
             ),
           )
@@ -90,29 +120,38 @@ class WishlistScreen extends StatelessWidget{
     return widget;
   }
 
-  Widget _shoesCollection(BuildContext context){
-    return BlocBuilder<ShoeBloc, ShoeState>(
-      builder: (context, state){
-        return Expanded(
-          child: GridView.builder(
-            itemCount: state.shoes.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.65,
-                crossAxisSpacing: 1.2.h,
-                mainAxisExtent: 36.h
-            ),
-            itemBuilder: (context, index){
-              var shoe = state.shoes[index];
-              return ShoeItem(
-                shoe: shoe,
-                shoes: state.shoes,
-                isGrid: true,
-              );
-            },
+  Widget _shoesCollection(BuildContext context, ShoeState state){
+    if(state.shoes.isEmpty){
+      return Expanded(
+        child: Center(
+          child: Text(
+            "No Shoes Found",
+            style: GoogleFonts.urbanist(fontSize: 18.sp, fontWeight: FontWeight.w700),
           ),
-        );
-      },
-    );
+        ),
+      );
+    }else{
+      return Expanded(
+        child: GridView.builder(
+          itemCount: state.shoes.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.65,
+              crossAxisSpacing: 1.2.h,
+              mainAxisExtent: 36.h
+          ),
+          itemBuilder: (context, index){
+            var shoe = state.shoes[index];
+            return ShoeItem(
+              shoe: shoe,
+              shoes: state.shoes,
+              isGrid: true,
+              brand: state.selectedBrand,
+              isFavorite: true,
+            );
+          },
+        ),
+      );
+    }
   }
 }
